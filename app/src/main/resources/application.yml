@@ -1,0 +1,46 @@
+server:
+  port: 8085
+  servlet:
+    context-path: /app
+
+spring:
+  application:
+    name: app
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  datasource:
+    url: jdbc:postgresql://localhost:5432/delivery_app
+    username: postgres
+    password: 23528861
+    initialization-mode: always
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    open-in-view: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        enable_lazy_load_no_trans: true
+
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/liquibase/changelog-master.yml
+    drop-first: false
+    database-change-log-table: DELIVERY_APP_DBCHANGELOG
+    database-change-log-lock-table: DELIVERY_APP_DBCHANGELOGLOCK
+
+eureka:
+  client:
+    service-url:
+      default-zone: http://discovery-sevice:8761/eureka/
+
+application:
+  jwt:
+    secretKey: securesecuresecuresecuresecuresecuresecuresecuresecuresecuresecuresecuresecure
+    tokenPrefix: Bearer
+    tokenExpirationAfterDays: 14

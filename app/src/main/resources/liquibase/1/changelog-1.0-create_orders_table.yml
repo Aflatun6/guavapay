@@ -1,0 +1,32 @@
+databaseChangeLog:
+  - changeSet:
+      id: Create users table
+      author: Aflatun Valibayli
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  name: id
+                  type: varchar(100)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: varchar(100)
+              - column:
+                  name: courier_id
+                  type: varchar(100)
+              - column:
+                  name: description
+                  type: varchar(100)
+              - column:
+                  name: destination
+                  type: varchar(100)
+              - column:
+                  name: status
+                  type: varchar(25)
+              - column:
+                  name: created_date
+                  type: timestamp
+            tableName: orders
