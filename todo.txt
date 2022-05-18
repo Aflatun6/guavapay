@@ -1,0 +1,3 @@
+optimize jwt token verifier
+write tests
+dockerize app

@@ -1,5 +1,9 @@
 package com.parcel.app.security;
 
+import static com.parcel.app.enums.Role.ADMIN;
+import static com.parcel.app.enums.Role.COURIER;
+import static com.parcel.app.enums.Role.USER;
+
 import com.parcel.app.config.JwtConfig;
 import javax.crypto.SecretKey;
 import lombok.RequiredArgsConstructor;
@@ -32,11 +36,11 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .addFilterBefore(getAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
-//                .antMatchers("/admin").hasRole(ADMIN.name())
-//                .antMatchers("/user").hasRole(USER.name())
-//                .antMatchers("/courier").hasRole(COURIER.name())
-                .antMatchers(HttpMethod.POST, "/user").permitAll()
-                .anyRequest().permitAll();
+                .antMatchers(HttpMethod.POST, "/user/").permitAll()
+                .antMatchers("/admin/**").hasRole(ADMIN.name())
+                .antMatchers("/user/**").hasRole(USER.name())
+                .antMatchers("/courier/**").hasRole(COURIER.name())
+                .anyRequest().authenticated();
     }
 
     private JwtTokenVerifier getAuthorizationFilter() {
