@@ -4,6 +4,7 @@ import com.parcel.app.dto.req.UserReq;
 import com.parcel.app.dto.resp.UserResp;
 import com.parcel.app.entity.UserEntity;
 import com.parcel.app.enums.Role;
+import com.parcel.app.exception.RecordNotFoundException;
 import com.parcel.app.repo.UserRepository;
 import com.parcel.app.util.MainLogger;
 import com.parcel.app.util.mapper.UserMapper;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -55,5 +57,17 @@ public class UserService {
     public List<UserResp> getAllCouriers() {
         return userRepository.findAllByRole(Role.COURIER.name())
                 .stream().map(userMapper::entityToResp).collect(Collectors.toList());
+    }
+
+    public UserEntity findByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("user with name " + username + " can't be found :("));
+    }
+
+    public UserEntity findById(String userId) {
+        UserEntity entity = userRepository.findById(userId)
+                .orElseThrow(() -> new RecordNotFoundException("user with id " + userId + " was not found"));
+        logger.info("fetched user entity {}", entity);
+        return entity;
     }
 }

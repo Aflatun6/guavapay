@@ -5,6 +5,7 @@ import static com.parcel.app.enums.Role.COURIER;
 import static com.parcel.app.enums.Role.USER;
 
 import com.parcel.app.config.JwtConfig;
+import com.parcel.app.service.UserService;
 import javax.crypto.SecretKey;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +14,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 
@@ -22,10 +22,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final PasswordEncoder passwordEncoder;
     private final SecretKey secretKey;
     private final JwtConfig jwtConfig;
-    private final UserDetailsServiceImp userService;
+    private final UserService userService;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {

@@ -3,6 +3,7 @@ package com.parcel.app.security;
 import com.google.common.base.Strings;
 import com.parcel.app.config.JwtConfig;
 import com.parcel.app.entity.UserEntity;
+import com.parcel.app.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
@@ -10,6 +11,7 @@ import io.jsonwebtoken.Jwts;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
@@ -17,6 +19,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -29,41 +32,27 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
     private final SecretKey secretKey;
     private final JwtConfig jwtConfig;
-    private final UserDetailsServiceImp userService;
+    private final UserService userService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(@NonNull HttpServletRequest request,
+                                    @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        String authorizationHeader = request.getHeader(jwtConfig.getAuthorizationHeader());
-
-        if (Strings.isNullOrEmpty(authorizationHeader) || !authorizationHeader.startsWith(jwtConfig.getTokenPrefix())) {
-            filterChain.doFilter(request, response);
+        String token = getToken(request, response, filterChain);
+        if (token == null) {
             return;
         }
-
-        String token = authorizationHeader.replace(jwtConfig.getTokenPrefix(), "");
-
         try {
-
             Jws<Claims> claimsJws = Jwts.parser()
                     .setSigningKey(secretKey)
                     .parseClaimsJws(token);
 
             Claims body = claimsJws.getBody();
 
-            String userId = body.get("userId", String.class);
-            UserEntity byId = userService.findById(userId);
-            UserDetailsImp userDetailsImp = new UserDetailsImp(byId);
+            UserDetailsImp userDetailsImp = getUserDetailsImp(body);
 
-            String username = body.getSubject();
-
-            var authorities = (List<Map<String, String>>) body.get("authorities");
-
-            Set<SimpleGrantedAuthority> simpleGrantedAuthorities = authorities.stream()
-                    .map(m -> new SimpleGrantedAuthority(m.get("authority")))
-                    .collect(Collectors.toSet());
+            Set<SimpleGrantedAuthority> simpleGrantedAuthorities = getAuthorities(body);
 
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     userDetailsImp,
@@ -76,7 +65,32 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
         } catch (JwtException e) {
             throw new IllegalStateException(String.format("Token %s cannot be trusted", token));
         }
-
         filterChain.doFilter(request, response);
+    }
+
+    private UserDetailsImp getUserDetailsImp(Claims body) {
+        String userId = body.get("userId", String.class);
+        UserEntity entity = userService.findById(userId);
+        return new UserDetailsImp(entity);
+    }
+
+    private Set<SimpleGrantedAuthority> getAuthorities(Claims body) {
+        return Objects.requireNonNull(
+                        body.entrySet().stream().filter(b -> b.getKey().equals("authorities")).findFirst()
+                                .map(b -> (List<Map<String, String>>) b.getValue())
+                                .orElse(null)).stream()
+                .flatMap(m -> m.values().stream()).map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toSet());
+    }
+
+    private String getToken(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws IOException, ServletException {
+        String authorizationHeader = request.getHeader(jwtConfig.getAuthorizationHeader());
+
+        if (Strings.isNullOrEmpty(authorizationHeader) || !authorizationHeader.startsWith(jwtConfig.getTokenPrefix())) {
+            filterChain.doFilter(request, response);
+            return null;
+        }
+        return authorizationHeader.replace(jwtConfig.getTokenPrefix(), "");
     }
 }

@@ -2,7 +2,7 @@ package com.parcel.app.security;
 
 import com.parcel.app.entity.UserEntity;
 import com.parcel.app.repo.UserRepository;
-import java.util.Optional;
+import com.parcel.app.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -13,31 +13,21 @@ import org.springframework.stereotype.Service;
 public class UserDetailsServiceImp implements UserDetailsService {
 
     private final UserRepository userRepository;
+    private final UserService userService;
 
     @Autowired
-    public UserDetailsServiceImp(UserRepository userRepository) {
+    public UserDetailsServiceImp(UserRepository userRepository, UserService userService) {
         this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<UserEntity> byUsername = userRepository
-                .findByUsername(username);
-
-        UserDetailsImp userDetailsImp = byUsername.map(UserDetailsImp::new)
-                .orElseThrow(() -> new UsernameNotFoundException("user with name " + username + " cant be found :(("));
-
-        return userDetailsImp;
-
+        return new UserDetailsImp(userService.findByUsername(username));
     }
 
-    public UserEntity findUserByUsername(String username) {
+    public UserEntity findById(String username) {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("user with name " + username + " cant be found :(("));
-    }
-
-    public UserEntity findById(String userId) {
-        return userRepository.findById(userId).orElseThrow(
-                () -> new RuntimeException("user with id " + userId + " cant be found :("));
+                .orElseThrow(() -> new UsernameNotFoundException("user with name " + username + " can't be found :("));
     }
 }
