@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-configmap
+data:
+  database_url: db-service
+  host: postgres
+  name: delivery_app

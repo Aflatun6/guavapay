@@ -1,3 +1,4 @@
 optimize jwt token verifier -> DONE
-write tests
-dockerize app
+write tests -> DONE
+dockerize app -> In Process
+add exceptions & handling

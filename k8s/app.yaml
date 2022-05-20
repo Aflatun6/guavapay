@@ -1,0 +1,57 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: app
+  labels:
+    name: app
+spec:
+  ports:
+    - nodePort: 8085
+      port: 8085
+      targetPort: 8085
+      protocol: TCP
+  selector:
+    app: app
+  type: NodePort
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+spec:
+  selector:
+    matchLabels:
+      app: app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      containers:
+        - name: app
+          image: avelibeyli6/app:1.0
+          ports:
+            - containerPort: 8085
+          env:   
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: db-configmap
+                  key: host
+            - name: DB_NAME 
+              valueFrom:
+                configMapKeyRef:
+                  name: db-configmap
+                  key: name
+            - name: DATABASE_USERNAME 
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: username
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: password

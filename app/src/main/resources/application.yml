@@ -1,5 +1,5 @@
 server:
-  port: 8085
+  port: ${PORT:8085}
   servlet:
     context-path: /app
 
@@ -10,9 +10,9 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
   datasource:
-    url: jdbc:postgresql://localhost:5432/delivery_app
-    username: postgres
-    password: 23528861
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/delivery_app}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
     initialization-mode: always
     driver-class-name: org.postgresql.Driver
 

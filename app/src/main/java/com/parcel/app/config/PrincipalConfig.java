@@ -9,8 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public class PrincipalConfig {
 
     public static UserDetailsImp getPrincipal() {
-        return (UserDetailsImp) SecurityContextHolder.getContext().getAuthentication()
-                .getPrincipal();
+        return (UserDetailsImp) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
     public static String getUserId() {
