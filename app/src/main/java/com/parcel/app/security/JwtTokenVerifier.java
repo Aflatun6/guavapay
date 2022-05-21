@@ -3,6 +3,7 @@ package com.parcel.app.security;
 import com.google.common.base.Strings;
 import com.parcel.app.config.JwtConfig;
 import com.parcel.app.entity.UserEntity;
+import com.parcel.app.exception.CustomExceptionHandler;
 import com.parcel.app.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -21,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -33,6 +35,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
     private final SecretKey secretKey;
     private final JwtConfig jwtConfig;
     private final UserService userService;
+    private final CustomExceptionHandler customExceptionHandler;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -63,7 +66,9 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
         } catch (JwtException e) {
-            throw new IllegalStateException(String.format("Token %s cannot be trusted", token));
+            customExceptionHandler.handle(request, response,
+                    new AccessDeniedException(String.format("Token %s cannot " +
+                            "be trusted", token)));
         }
         filterChain.doFilter(request, response);
     }
