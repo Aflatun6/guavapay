@@ -1,39 +1,39 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: app
+  name: gateway
   labels:
-    name: app
+    name: gateway
 spec:
   ports:
-    - nodePort: 30163
-      port: 8085
-      targetPort: 8085
+    - nodePort: 30160
+      port: 8080
+      targetPort: 8080
       protocol: TCP
   selector:
-    app: app
+    app: gateway
   type: NodePort
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: app
+  name: gateway
 spec:
   selector:
     matchLabels:
-      app: app
+      app: gateway
   replicas: 1
   template:
     metadata:
       labels:
-        app: app
+        app: gateway
     spec:
       containers:
-        - name: app
-          image: avelibeyli6/guavapay-app:1.0
+        - name: gateway
+          image: avelibeyli6/guavapay-gateway:1.0
           ports:
-            - containerPort: 8085
+            - containerPort: 8080
           env:   
             - name: DB_HOST
               valueFrom:

@@ -10,7 +10,7 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/delivery_app}
+    url: jdbc:postgresql://${DB_HOST}:5432/${DB_NAME}
     username: ${DATABASE_USERNAME:postgres}
     password: ${DATABASE_PASSWORD:23528861}
     initialization-mode: always
